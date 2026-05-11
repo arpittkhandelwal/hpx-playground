@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HPX Playground — High-Performance C++ Online</title>
+  <meta name="description" content="Experience HPX — the C++ Standard Library for Concurrency and Parallelism — directly in your browser. Write, compile, and run real HPX code online." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ═══ CANVAS BACKGROUND ═══ -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">HPX <span class="logo-tag">Playground</span></span>
+      </div>
+      <div class="runtime-badge" id="runtime-badge">
+        <span class="badge-dot"></span>
+        <span id="runtime-label">Detecting...</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="thread-control">
+        <label>Threads</label>
+        <div class="thread-stepper">
+          <button id="threads-dec">−</button>
+          <span id="threads-val">4</span>
+          <button id="threads-inc">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-share" id="btn-share" title="Share code">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+      <button class="btn-run" id="btn-run">
+        <svg class="run-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        <span class="run-label">Run</span>
+        <kbd>⌘↵</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN LAYOUT ═══ -->
+  <main class="layout">
+
+    <!-- ── LEFT SIDEBAR: Examples ── -->
+    <aside class="sidebar-left" id="sidebar-left">
+      <div class="sidebar-header">
+        <span>Examples</span>
+        <input class="search-box" id="example-search" placeholder="🔍 Search…" />
+      </div>
+      <nav class="example-nav" id="example-nav">
+        <!-- Injected by app.js -->
+      </nav>
+    </aside>
+
+    <!-- ── CENTER: Editor + Output ── -->
+    <section class="center-panel">
+      <div class="editor-wrapper" id="editor-wrapper">
+        <div class="editor-topbar">
+          <span class="file-tab active">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            main.cpp
+          </span>
+          <div class="editor-actions">
+            <button class="icon-btn" id="btn-format" title="Format code">⌥F</button>
+            <button class="icon-btn" id="btn-clear" title="Clear editor">✕</button>
+          </div>
+        </div>
+        <div id="monaco-editor"></div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="output-panel" id="output-panel">
+        <div class="output-header">
+          <div class="output-tabs">
+            <button class="out-tab active" data-tab="console">Console</button>
+            <button class="out-tab" data-tab="metrics">Metrics</button>
+            <button class="out-tab" data-tab="info">HPX Info</button>
+          </div>
+          <div class="output-actions">
+            <button class="icon-btn" id="btn-copy-out" title="Copy output">⎘</button>
+            <button class="icon-btn" id="btn-clear-out" title="Clear output">✕</button>
+            <button class="icon-btn panel-toggle" id="btn-collapse-out" title="Collapse">⌄</button>
+          </div>
+        </div>
+
+        <div class="output-body">
+          <!-- Console Tab -->
+          <div class="tab-content active" id="tab-console">
+            <div class="console-wrap" id="console-output">
+              <div class="console-placeholder">
+                <span class="ph-icon">⚡</span>
+                <p>Write HPX code and press <kbd>Run</kbd> to execute</p>
+              </div>
+            </div>
+          </div>
+          <!-- Metrics Tab -->
+          <div class="tab-content" id="tab-metrics">
+            <div class="metrics-grid" id="metrics-grid">
+              <div class="metric-card"><div class="mc-label">Compile Time</div><div class="mc-value" id="m-compile">—</div></div>
+              <div class="metric-card"><div class="mc-label">Run Time</div><div class="mc-value" id="m-run">—</div></div>
+              <div class="metric-card"><div class="mc-label">Threads Used</div><div class="mc-value" id="m-threads">—</div></div>
+              <div class="metric-card"><div class="mc-label">Exit Status</div><div class="mc-value" id="m-status">—</div></div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="pb-label">Speedup Indicator</div>
+              <div class="perf-bar" id="perf-bar"><div class="pb-fill" id="pb-fill"></div></div>
+              <div class="pb-hint" id="pb-hint">Run code to see metrics</div>
+            </div>
+          </div>
+          <!-- Info Tab -->
+          <div class="tab-content" id="tab-info">
+            <div class="info-content" id="info-content">
+              <!-- Filled dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RIGHT SIDEBAR: Docs ── -->
+    <aside class="sidebar-right" id="sidebar-right">
+      <div class="sidebar-header">
+        <span>Documentation</span>
+        <button class="icon-btn" id="btn-close-docs" title="Close">✕</button>
+      </div>
+      <div class="docs-body" id="docs-body">
+        <!-- Filled dynamically -->
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ═══ SHARE MODAL ═══ -->
+  <div class="modal-overlay" id="share-modal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Share Code</h3>
+        <button class="icon-btn" id="modal-close">✕</button>
+      </div>
+      <p class="modal-desc">Your code is encoded in the URL — share it with anyone.</p>
+      <input class="share-url-input" id="share-url" readonly />
+      <button class="btn-run" id="btn-copy-share">Copy Link</button>
+    </div>
+  </div>
+
+  <!-- ═══ TOAST ═══ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Monaco Editor from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+  <script src="examples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
